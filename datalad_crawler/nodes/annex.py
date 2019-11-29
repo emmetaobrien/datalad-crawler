@@ -44,6 +44,8 @@ from datalad.support.versions import get_versions
 from datalad.support.exceptions import AnnexBatchCommandError
 from datalad.support.network import get_url_straight_filename
 from datalad.support.network import get_url_disposition_filename
+# legacy import from -core, not longer part of the Repo classes
+from datalad.tests.utils import get_branch_commits
 
 from datalad import cfg
 
@@ -820,11 +822,11 @@ class Annexificator(object):
 
             if one_commit_at_a_time:
                 all_to_merge = list(
-                    self.repo.get_branch_commits(
+                    get_branch_commits(
+                        self.repo,
                         branch,
                         limit='left-only',
-                        stop=last_merged_checksum,
-                        value='hexsha'))[::-1]
+                        stop=last_merged_checksum))[::-1]
             else:
                 all_to_merge = [branch]
 

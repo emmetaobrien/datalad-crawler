@@ -55,6 +55,7 @@ from datalad.tests.utils import (
     use_cassette,
     with_tempfile,
     with_tree,
+    get_branch_commits,
 )
 
 from .. import openfmri
@@ -327,9 +328,9 @@ def test_openfmri_pipeline1(ind, topurl, outd, clonedir):
     # actually the tree should look quite neat with 1.0.0 tag having 1 parent in incoming
     # 1.0.1 having 1.0.0 and the 2nd commit in incoming as parents
 
-    commits = {b: list(repo.get_branch_commits(b)) for b in branches}
-    commits_hexsha = {b: list(repo.get_branch_commits(b, value='hexsha')) for b in branches}
-    commits_l = {b: list(repo.get_branch_commits(b, limit='left-only')) for b in branches}
+    commits = {b: list(get_branch_commits(repo, b)) for b in branches}
+    commits_hexsha = {b: list(get_branch_commits(repo, b, value='hexsha')) for b in branches}
+    commits_l = {b: list(get_branch_commits(repo, b, limit='left-only')) for b in branches}
 
     # all commits out there:
     # backend set, dataset init, crawler init
@@ -434,7 +435,7 @@ def test_openfmri_pipeline1(ind, topurl, outd, clonedir):
         out = run_pipeline(pipeline)
     eq_(len(out), 1)
 
-    commits_hexsha_ = {b: list(repo.get_branch_commits(b, value='hexsha')) for b in branches}
+    commits_hexsha_ = {b: list(get_branch_commits(repo, b, value='hexsha')) for b in branches}
     eq_(commits_hexsha, commits_hexsha_)  # i.e. nothing new
     # actually we do manage to add_git 1 (README) since it is generated committed directly to git
     # BUT now fixed -- if not committed (was the same), should be marked as skipped
@@ -461,9 +462,9 @@ def test_openfmri_pipeline1(ind, topurl, outd, clonedir):
 
     # new instance so it re-reads git stuff etc
     # repo = AnnexRepo(outd, create=False)  # to be used in the checks
-    commits_ = {b: list(repo.get_branch_commits(b)) for b in branches}
-    commits_hexsha_ = {b: list(repo.get_branch_commits(b, value='hexsha')) for b in branches}
-    commits_l_ = {b: list(repo.get_branch_commits(b, limit='left-only')) for b in branches}
+    commits_ = {b: list(get_branch_commits(repo, b)) for b in branches}
+    commits_hexsha_ = {b: list(get_branch_commits(repo, b, value='hexsha')) for b in branches}
+    commits_l_ = {b: list(get_branch_commits(repo, b, limit='left-only')) for b in branches}
 
     assert_not_equal(commits_hexsha, commits_hexsha_)
     eq_(out[0]['datalad_stats'], ActivityStats())  # commit happened so stats were consumed
@@ -492,7 +493,7 @@ def test_openfmri_pipeline1(ind, topurl, outd, clonedir):
     incoming_files = repo.get_files('incoming')
     target_incoming_files.remove('ds666_R1.0.0.tar.gz')
     eq_(set(incoming_files), target_incoming_files)
-    commits_hexsha_removed = {b: list(repo.get_branch_commits(b, value='hexsha')) for b in branches}
+    commits_hexsha_removed = {b: list(get_branch_commits(repo, b, value='hexsha')) for b in branches}
     # our 'statuses' database should have recorded the change thus got a diff
     # which propagated through all branches
     for b in 'master', 'incoming-processed':
@@ -573,9 +574,9 @@ def test_openfmri_pipeline2(ind, topurl, outd):
     # actually the tree should look quite neat with 1.0.0 tag having 1 parent in incoming
     # 1.0.1 having 1.0.0 and the 2nd commit in incoming as parents
 
-    commits = {b: list(repo.get_branch_commits(b)) for b in branches}
-    commits_hexsha = {b: list(repo.get_branch_commits(b, value='hexsha')) for b in branches}
-    commits_l = {b: list(repo.get_branch_commits(b, limit='left-only')) for b in branches}
+    commits = {b: list(get_branch_commits(repo, b)) for b in branches}
+    commits_hexsha = {b: list(get_branch_commits(repo, b, value='hexsha')) for b in branches}
+    commits_l = {b: list(get_branch_commits(repo, b, limit='left-only')) for b in branches}
 
     # all commits out there:
     # backend set, dataset init, crawler, init, incoming (shares with master -1),
@@ -595,7 +596,7 @@ def test_openfmri_pipeline2(ind, topurl, outd):
         out = run_pipeline(pipeline)
     eq_(len(out), 1)
 
-    commits_hexsha_ = {b: list(repo.get_branch_commits(b, value='hexsha')) for b in branches}
+    commits_hexsha_ = {b: list(get_branch_commits(repo, b, value='hexsha')) for b in branches}
     eq_(commits_hexsha, commits_hexsha_)  # i.e. nothing new
     eq_(out[0]['datalad_stats'], ActivityStats(files=2, skipped=2, urls=2))
     eq_(out[0]['datalad_stats'], out[0]['datalad_stats'].get_total())
